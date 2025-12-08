@@ -302,11 +302,3 @@ and see:
 
 ---
 
-## 10. Contact
-
-If you have questions about the code or would like to reuse it for
-teaching/experiments, please contact the repository owner.
-
-```
-::contentReference[oaicite:0]{index=0}
-```
