@@ -1,0 +1,164 @@
+<!-- templates/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>News Truthfulness Detection Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <h1>News Truthfulness Detection</h1>
+      <p class="subtitle">Based on TF-IDF + Logistic Regression, with a similar real news article as evidence</p>
+    </header>
+
+    <main class="main">
+      <section class="input-card">
+        <label for="news-input">Paste or type a piece of news here:</label>
+        <textarea id="news-input" placeholder="For example: A certain country announced it will close all universities next year..."></textarea>
+        <div class="actions">
+          <button id="btn-predict">Check Truthfulness</button>
+          <span id="status" class="status"></span>
+        </div>
+      </section>
+
+      <section id="result-card" class="result-card hidden">
+        <h2>Detection Result</h2>
+
+        <div class="prediction-row">
+          <span id="pred-label" class="pill pill-neutral">--</span>
+          <span id="pred-confidence" class="confidence">Confidence: --</span>
+        </div>
+
+        <div class="prob-bars">
+          <div class="prob-row">
+            <span>REAL Probability</span>
+            <div class="prob-bar">
+              <div id="bar-real" class="prob-bar-inner"></div>
+            </div>
+            <span id="prob-real-text" class="prob-value">--</span>
+          </div>
+          <div class="prob-row">
+            <span>FAKE Probability</span>
+            <div class="prob-bar">
+              <div id="bar-fake" class="prob-bar-inner"></div>
+            </div>
+            <span id="prob-fake-text" class="prob-value">--</span>
+          </div>
+        </div>
+
+        <div class="evidence">
+          <h3>Similar Real News Evidence</h3>
+          <p class="evi-meta">
+            <span id="evi-source" class="tag"></span>
+            <span id="evi-sim" class="sim"></span>
+          </p>
+          <h4 id="evi-title"></h4>
+          <p id="evi-snippet" class="evi-snippet"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const btn = document.getElementById("btn-predict");
+    const statusEl = document.getElementById("status");
+    const inputEl = document.getElementById("news-input");
+    const resultCard = document.getElementById("result-card");
+
+    const labelEl = document.getElementById("pred-label");
+    const confEl = document.getElementById("pred-confidence");
+    const barReal = document.getElementById("bar-real");
+    const barFake = document.getElementById("bar-fake");
+    const probRealText = document.getElementById("prob-real-text");
+    const probFakeText = document.getElementById("prob-fake-text");
+
+    const eviSource = document.getElementById("evi-source");
+    const eviSim = document.getElementById("evi-sim");
+    const eviTitle = document.getElementById("evi-title");
+    const eviSnippet = document.getElementById("evi-snippet");
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        btn.disabled = true;
+        btn.textContent = "Predicting...";
+        statusEl.textContent = "Calling local model, please wait";
+      } else {
+        btn.disabled = false;
+        btn.textContent = "Check Truthfulness";
+        statusEl.textContent = "";
+      }
+    }
+
+    btn.addEventListener("click", async () => {
+      const text = inputEl.value.trim();
+      if (!text) {
+        alert("Please enter a piece of news first.");
+        return;
+      }
+
+      setLoading(true);
+      resultCard.classList.add("hidden");
+
+      try {
+        const resp = await fetch("/api/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.error || "Request failed");
+        }
+
+        const data = await resp.json();
+        renderResult(data);
+      } catch (err) {
+        console.error(err);
+        alert("Prediction failed: " + err.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    function renderResult(data) {
+      const label = data.label || "--";
+      const pReal = data.prob_real ?? 0;
+      const pFake = data.prob_fake ?? 0;
+
+      labelEl.textContent = label;
+      labelEl.classList.remove("pill-real", "pill-fake", "pill-neutral");
+      if (label === "REAL") {
+        labelEl.classList.add("pill-real");
+      } else if (label === "FAKE") {
+        labelEl.classList.add("pill-fake");
+      } else {
+        labelEl.classList.add("pill-neutral");
+      }
+
+      const conf = label === "FAKE" ? pFake : pReal;
+      confEl.textContent = `Confidence: ${(conf * 100).toFixed(1)}%`;
+
+      barReal.style.width = (pReal * 100).toFixed(1) + "%";
+      barFake.style.width = (pFake * 100).toFixed(1) + "%";
+      probRealText.textContent = (pReal * 100).toFixed(1) + "%";
+      probFakeText.textContent = (pFake * 100).toFixed(1) + "%";
+
+      const evi = data.evidence || {};
+      eviSource.textContent = evi.source ? `Source: ${evi.source}` : "";
+      if (typeof evi.similarity === "number") {
+        eviSim.textContent = `Similarity: ${(evi.similarity * 100).toFixed(1)}%`;
+      } else {
+        eviSim.textContent = "";
+      }
+      eviTitle.textContent = evi.title || "(No title)";
+      eviSnippet.textContent = evi.snippet || "(No evidence text found)";
+
+      resultCard.classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>

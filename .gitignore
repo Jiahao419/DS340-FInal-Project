@@ -1,0 +1,20 @@
+# virtual env
+.venv_torch/
+
+# python cache
+__pycache__/
+*.pyc
+
+# raw data (too large)
+data/
+
+# ignore all outputs by default
+output/
+
+# but keep final small result files and figures
+!output/*.png
+!output/results_summary.csv
+!output/bert_threshold_all.csv
+
+# VSCode etc.
+.vscode/
