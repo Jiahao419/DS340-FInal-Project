@@ -51,10 +51,6 @@ project root so the structure looks like:
 ```text
 DS340/
   data/
-    main/
-      Constraint_Train.csv
-      Constraint_Test.csv
-      Constraint_Val.csv
     covid/
       ...
     welfake/
