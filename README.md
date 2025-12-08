@@ -1,4 +1,3 @@
-下面这一整块就是完整 `README.md`，你可以直接复制粘贴到文件里用：
 
 ````markdown
 # Fake News Detection with Evidence (DS340 Project)
