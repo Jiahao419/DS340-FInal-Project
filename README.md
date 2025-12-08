@@ -1,5 +1,4 @@
 
-````markdown
 # Fake News Detection with Evidence (DS340 Project)
 
 This repository implements a fake–news detector for short news claims.
