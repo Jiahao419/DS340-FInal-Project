@@ -67,7 +67,7 @@ The exact internal structure in Drive matches this repo.
 
 Tested with:
 
-* Python 3.11
+* Python 3.11 & 3.19
 * Windows 11
 * Optional: NVIDIA GPU with CUDA (for BERT and sentence-transformers)
 
@@ -78,13 +78,8 @@ Create a virtual environment and install dependencies:
 python -m venv .venv_torch
 .\.venv_torch\Scripts\activate      # PowerShell on Windows
 
-pip install --upgrade pip
-
 # Core dependencies
-pip install ^
-  pandas numpy scikit-learn matplotlib seaborn tqdm ^
-  flask ^
-  sentence-transformers transformers
+pip install pandas numpy scikit-learn matplotlib seaborn tqdm flask sentence-transformers transformers
 
 # Install PyTorch (CPU or GPU). For GPU with CUDA 12.x you can do:
 # (or follow the official PyTorch install instructions)
@@ -98,7 +93,7 @@ PyTorch / BERT are optional.
 
 ## 4. Data preprocessing pipeline
 
-Run all commands from the project root **with the virtualenv activated**.
+### For demo purposes, you can only run commands for `all` dataset after step 4.2, since all of the methods used this dataset.
 
 ### 4.1 Clean each dataset
 
@@ -297,8 +292,6 @@ and see:
 * Some scripts re-train models every time they are run. For faster
   experimentation, you can comment out training lines and load saved
   models instead.
-* BERT training is **much faster on GPU**. On CPU it can take over an hour
-  on the `all` dataset.
 
 ---
 
