@@ -1,5 +1,5 @@
 
-# Fake News Detection with Evidence (DS340 Project)
+# Fake News Detection with Evidence 
 
 This repository implements a fake–news detector for short news claims.
 We compare several models (TF-IDF + Logistic Regression, Logistic Regression
